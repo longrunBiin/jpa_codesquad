@@ -1,7 +1,10 @@
 package com.example.codesquad.controller;
 
+import com.example.codesquad.dto.memberDto.MemberRequestDto.LoginRequestDto;
 import com.example.codesquad.dto.memberDto.MemberRequestDto.SignUpRequestDto;
+import com.example.codesquad.entity.Member;
 import com.example.codesquad.service.MemberService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,7 +22,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody SignUpRequestDto request) {
         if (memberService.validateDuplicateEmail(request.email()))
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -27,5 +30,20 @@ public class MemberController {
 
         memberService.createMember(request);
         return ResponseEntity.ok("회원 생성");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto request, HttpSession session) {
+        Member loginMember;
+
+        try {
+            loginMember = memberService.authenticateMember(request);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(e.getMessage());
+        }
+
+        session.setAttribute("loginMemberId", loginMember.getMemberId());
+        return ResponseEntity.ok("로그인 성공");
     }
 }

@@ -24,12 +24,14 @@ public class Member {
     @Id
     @GeneratedValue
     private Long memberId;
+    private String nickname;
     private String email;
     private String password;
 
 
-    public static Member createMemberByRequest(String email, String password) {
+    public static Member createMemberByRequest(String email, String password, String nickname) {
         return Member.builder()
+                .nickname(nickname)
                 .email(email)
                 .password(password)
                 .build();
