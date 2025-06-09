@@ -27,6 +27,11 @@ public class Post {
     private String title;
     private String content;
     private String imageUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     public static Post createPostByRequest(WritePostRequestDto request) {
         return Post.builder()
                 .title(request.title())
