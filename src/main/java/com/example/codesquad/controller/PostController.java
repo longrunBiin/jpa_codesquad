@@ -1,5 +1,6 @@
 package com.example.codesquad.controller;
 
+import com.example.codesquad.dto.postDto.PostListResponseDto;
 import com.example.codesquad.dto.postDto.PostRequestDto.UpdatePostRequestDto;
 import com.example.codesquad.dto.postDto.PostRequestDto.WritePostRequestDto;
 import com.example.codesquad.entity.Post;
@@ -12,9 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +55,7 @@ public class PostController {
         Long loginMemberId = (Long) session.getAttribute("loginMemberId");
         Post post = postService.createPost(requestDto, loginMemberId);
 
-        if (!images.isEmpty()){
+        if (!images.isEmpty()) {
             postImageService.uploadImage(post, images);
         }
 
@@ -60,9 +65,10 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<String> deletePost(@PathVariable Long postId, HttpSession session, HttpServletRequest request) {
+    public ResponseEntity<String> deletePost(@PathVariable Long postId, HttpSession session,
+                                             HttpServletRequest request) {
         Optional<String> sessionId = extractTokenFromCookies(request.getCookies());
-        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())){
+        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인이 필요합니다");
         }
@@ -82,7 +88,7 @@ public class PostController {
     public ResponseEntity<String> updatePost(@RequestBody UpdatePostRequestDto requestDto, @PathVariable Long postId,
                                              HttpSession session, HttpServletRequest request) {
         Optional<String> sessionId = extractTokenFromCookies(request.getCookies());
-        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())){
+        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인이 필요합니다");
         }
@@ -90,7 +96,7 @@ public class PostController {
         Long loginMemberId = (Long) session.getAttribute("loginMemberId");
         Optional<Post> post = postService.updatePost(requestDto, loginMemberId, postId);
 
-        if (post.isEmpty()){
+        if (post.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body("글을 수정할 수 없습니다.");
         }
@@ -99,7 +105,9 @@ public class PostController {
     }
 
     private Optional<String> extractTokenFromCookies(Cookie[] cookies) {
-        if (cookies == null) return Optional.empty();
+        if (cookies == null) {
+            return Optional.empty();
+        }
 
         for (Cookie cookie : cookies) {
             if ("JSESSIONID".equals(cookie.getName())) {
@@ -107,5 +115,13 @@ public class PostController {
             }
         }
         return Optional.empty();
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<PostListResponseDto>> showPosts(Pageable pageable) {
+        Page<PostListResponseDto> postByPage = postService.getPostByPage(pageable);
+
+        return ResponseEntity.ok()
+                .body(postByPage);
     }
 }

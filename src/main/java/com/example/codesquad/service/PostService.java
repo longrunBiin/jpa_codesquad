@@ -1,6 +1,6 @@
 package com.example.codesquad.service;
 
-import com.example.codesquad.dto.postDto.PostRequestDto;
+import com.example.codesquad.dto.postDto.PostListResponseDto;
 import com.example.codesquad.dto.postDto.PostRequestDto.UpdatePostRequestDto;
 import com.example.codesquad.dto.postDto.PostRequestDto.WritePostRequestDto;
 import com.example.codesquad.entity.Member;
@@ -9,6 +9,8 @@ import com.example.codesquad.repository.MemberRepository;
 import com.example.codesquad.repository.PostRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,5 +55,10 @@ public class PostService {
         }
         post.updatePost(request.title(), request.content());
         return Optional.of(postRepository.save(post));
+    }
+
+    public Page<PostListResponseDto> getPostByPage(Pageable pageable) {
+        return postRepository.findPagedPosts(pageable);
+
     }
 }
