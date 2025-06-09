@@ -4,9 +4,9 @@ import com.example.codesquad.dto.commentDto.CommentListResponseDto;
 import com.example.codesquad.dto.commentDto.CommentRequestDto.WriteCommentRequestDto;
 import com.example.codesquad.entity.Comment;
 import com.example.codesquad.service.CommentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,8 +37,9 @@ public class CommentController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<Slice<CommentListResponseDto>> showComments(@PageableDefault(size = 5) Pageable pageable) {
-        Slice<CommentListResponseDto> comments = commentService.getcomments(pageable);
+    public ResponseEntity<Slice<CommentListResponseDto>> showComments(@PageableDefault(size = 5) Pageable pageable,
+                                                                      @RequestParam(required = false) Long lastId) {
+        Slice<CommentListResponseDto> comments = commentService.getComments(pageable, lastId);
 
         return ResponseEntity.ok()
                 .body(comments);

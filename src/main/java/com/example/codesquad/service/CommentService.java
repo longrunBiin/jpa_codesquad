@@ -6,6 +6,7 @@ import com.example.codesquad.entity.Comment;
 import com.example.codesquad.entity.Post;
 import com.example.codesquad.repository.CommentRepository;
 import com.example.codesquad.repository.PostRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -25,7 +26,9 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public Slice<CommentListResponseDto> getcomments(Pageable pageable) {
-        return commentRepository.findSlicedComments(pageable);
+    public Slice<CommentListResponseDto> getComments(Pageable pageable, Long lastId) {
+        if (lastId == null)
+            return commentRepository.findFirstComments(pageable);
+        return commentRepository.findNextComments(lastId, pageable);
     }
 }
