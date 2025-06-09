@@ -1,9 +1,7 @@
 package com.example.codesquad.controller;
 
-import com.example.codesquad.dto.commentRequestDto.CommentRequestDto.WriteCommentRequestDto;
-import com.example.codesquad.dto.postDto.PostRequestDto.WritePostRequestDto;
+import com.example.codesquad.dto.commentDto.CommentRequestDto.WriteCommentRequestDto;
 import com.example.codesquad.entity.Comment;
-import com.example.codesquad.entity.Post;
 import com.example.codesquad.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

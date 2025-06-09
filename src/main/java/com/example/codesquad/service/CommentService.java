@@ -1,6 +1,6 @@
 package com.example.codesquad.service;
 
-import com.example.codesquad.dto.commentRequestDto.CommentRequestDto.WriteCommentRequestDto;
+import com.example.codesquad.dto.commentDto.CommentRequestDto.WriteCommentRequestDto;
 import com.example.codesquad.entity.Comment;
 import com.example.codesquad.entity.Post;
 import com.example.codesquad.repository.CommentRepository;

@@ -1,7 +1,6 @@
 package com.example.codesquad.entity;
 
-import com.example.codesquad.dto.commentRequestDto.CommentRequestDto.WriteCommentRequestDto;
-import jakarta.persistence.CascadeType;
+import com.example.codesquad.dto.commentDto.CommentRequestDto.WriteCommentRequestDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
