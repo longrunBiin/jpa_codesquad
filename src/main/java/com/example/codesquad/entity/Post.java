@@ -27,11 +27,6 @@ public class Post {
     private String title;
     private String content;
     private String imageUrl;
-
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
-
     public static Post createPostByRequest(WritePostRequestDto request) {
         return Post.builder()
                 .title(request.title())
