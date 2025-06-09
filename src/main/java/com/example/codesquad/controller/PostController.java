@@ -3,10 +3,12 @@ package com.example.codesquad.controller;
 import com.example.codesquad.dto.postDto.PostRequestDto.UpdatePostRequestDto;
 import com.example.codesquad.dto.postDto.PostRequestDto.WritePostRequestDto;
 import com.example.codesquad.entity.Post;
+import com.example.codesquad.service.PostImageService;
 import com.example.codesquad.service.PostService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @Slf4j
@@ -28,19 +32,28 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
 
     private final PostService postService;
+    private final PostImageService postImageService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> writePost(@RequestBody WritePostRequestDto requestDto, HttpServletRequest request) {
+    public ResponseEntity<String> writePost(@RequestPart(value = "content") WritePostRequestDto requestDto,
+                                            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                            HttpServletRequest request) {
+
         Optional<String> sessionId = extractTokenFromCookies(request.getCookies());
         HttpSession session = request.getSession();
-        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())){
+        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인이 필요합니다");
         }
 
         Long loginMemberId = (Long) session.getAttribute("loginMemberId");
         Post post = postService.createPost(requestDto, loginMemberId);
+
+        if (!images.isEmpty()){
+            postImageService.uploadImage(post, images);
+        }
+
         log.info("게시글 생성 {}, {}", post.getTitle(), post.getContent());
         return ResponseEntity.ok("글이 생성되었습니다.");
     }

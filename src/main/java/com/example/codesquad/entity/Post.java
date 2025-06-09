@@ -8,6 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +28,9 @@ public class Post {
     private Long postId;
     private String title;
     private String content;
-    private String imageUrl;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> postImages;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -41,12 +45,6 @@ public class Post {
                 .title(request.title())
                 .content(request.content())
                 .member(member)
-                .build();
-    }
-    public static Post createPostByRequest(WritePostRequestDto request) {
-        return Post.builder()
-                .title(request.title())
-                .content(request.content())
                 .build();
     }
 }
