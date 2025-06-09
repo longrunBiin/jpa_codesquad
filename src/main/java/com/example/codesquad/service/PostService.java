@@ -17,4 +17,9 @@ public class PostService {
         Post post = Post.createPostByRequest(request);
         return postRepository.save(post);
     }
+
+    public void deletePostAndComment(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
+        postRepository.delete(post);
+    }
 }

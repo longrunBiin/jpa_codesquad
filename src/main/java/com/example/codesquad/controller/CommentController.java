@@ -27,6 +27,6 @@ public class CommentController {
     @ResponseStatus(HttpStatus.CREATED)
     public void writeComment(@RequestBody WriteCommentRequestDto request, @PathVariable Long postId) {
         Comment savedComment = commentService.createComment(request, postId);
-        log.info("댓글 생성 id : {}, content : {} ");
+        log.info("댓글 생성 id : {}, content : {} ", savedComment.getCommentId(), savedComment.getContent());
     }
 }
