@@ -1,11 +1,14 @@
 package com.example.codesquad.service;
 
+import com.example.codesquad.dto.commentDto.CommentListResponseDto;
 import com.example.codesquad.dto.commentDto.CommentRequestDto.WriteCommentRequestDto;
 import com.example.codesquad.entity.Comment;
 import com.example.codesquad.entity.Post;
 import com.example.codesquad.repository.CommentRepository;
 import com.example.codesquad.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,5 +23,9 @@ public class CommentService {
         Comment comment = Comment.createCommentByRequest(request, post);
 
         return commentRepository.save(comment);
+    }
+
+    public Slice<CommentListResponseDto> getcomments(Pageable pageable) {
+        return commentRepository.findSlicedComments(pageable);
     }
 }

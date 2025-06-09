@@ -1,11 +1,18 @@
 package com.example.codesquad.controller;
 
+import com.example.codesquad.dto.commentDto.CommentListResponseDto;
 import com.example.codesquad.dto.commentDto.CommentRequestDto.WriteCommentRequestDto;
 import com.example.codesquad.entity.Comment;
 import com.example.codesquad.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,5 +33,13 @@ public class CommentController {
     public void writeComment(@RequestBody WriteCommentRequestDto request, @PathVariable Long postId) {
         Comment savedComment = commentService.createComment(request, postId);
         log.info("댓글 생성 id : {}, content : {} ", savedComment.getCommentId(), savedComment.getContent());
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<Slice<CommentListResponseDto>> showComments(@PageableDefault(size = 5) Pageable pageable) {
+        Slice<CommentListResponseDto> comments = commentService.getcomments(pageable);
+
+        return ResponseEntity.ok()
+                .body(comments);
     }
 }
