@@ -4,10 +4,13 @@ import com.example.codesquad.dto.memberDto.MemberRequestDto.LoginRequestDto;
 import com.example.codesquad.dto.memberDto.MemberRequestDto.SignUpRequestDto;
 import com.example.codesquad.entity.Member;
 import com.example.codesquad.service.MemberService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +36,7 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto request, HttpSession session) {
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto request, HttpSession session, HttpServletResponse response) {
         Member loginMember;
 
         try {
@@ -44,6 +47,16 @@ public class MemberController {
         }
 
         session.setAttribute("loginMemberId", loginMember.getMemberId());
+
+        ResponseCookie cookie = ResponseCookie.from("JSESSIONID", session.getId())
+                .httpOnly(true)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(60 * 60 * 24)
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
         return ResponseEntity.ok("로그인 성공");
     }
 }

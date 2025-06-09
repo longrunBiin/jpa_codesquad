@@ -32,6 +32,17 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    public void updatePost(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+    public static Post createPostByRequest(WritePostRequestDto request, Member member) {
+        return Post.builder()
+                .title(request.title())
+                .content(request.content())
+                .member(member)
+                .build();
+    }
     public static Post createPostByRequest(WritePostRequestDto request) {
         return Post.builder()
                 .title(request.title())

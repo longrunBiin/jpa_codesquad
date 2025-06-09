@@ -1,13 +1,19 @@
 package com.example.codesquad.controller;
 
-import com.example.codesquad.dto.postDto.PostRequestDto;
+import com.example.codesquad.dto.postDto.PostRequestDto.UpdatePostRequestDto;
 import com.example.codesquad.dto.postDto.PostRequestDto.WritePostRequestDto;
 import com.example.codesquad.entity.Post;
 import com.example.codesquad.service.PostService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,14 +31,54 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void writePost(@RequestBody WritePostRequestDto request) {
-        Post post = postService.createPost(request);
+    public ResponseEntity<String> writePost(@RequestBody WritePostRequestDto requestDto, HttpServletRequest request) {
+        Optional<String> sessionId = extractTokenFromCookies(request.getCookies());
+        HttpSession session = request.getSession();
+        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인이 필요합니다");
+        }
+
+        Long loginMemberId = (Long) session.getAttribute("loginMemberId");
+        Post post = postService.createPost(requestDto, loginMemberId);
         log.info("게시글 생성 {}, {}", post.getTitle(), post.getContent());
+        return ResponseEntity.ok("글이 생성되었습니다.");
     }
 
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(@PathVariable Long postId) {
         postService.deletePostAndComment(postId);
+    }
+
+    @PatchMapping("/{postId}")
+    public ResponseEntity<String> updatePost(@RequestBody UpdatePostRequestDto requestDto, @PathVariable Long postId,
+                                             HttpSession session, HttpServletRequest request) {
+        Optional<String> sessionId = extractTokenFromCookies(request.getCookies());
+        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인이 필요합니다");
+        }
+
+        Long loginMemberId = (Long) session.getAttribute("loginMemberId");
+        Optional<Post> post = postService.updatePost(requestDto, loginMemberId, postId);
+
+        if (post.isEmpty()){
+            return ResponseEntity.badRequest()
+                    .body("글을 수정할 수 없습니다.");
+        }
+
+        return ResponseEntity.ok("글이 수정되었습니다");
+    }
+
+    private Optional<String> extractTokenFromCookies(Cookie[] cookies) {
+        if (cookies == null) return Optional.empty();
+
+        for (Cookie cookie : cookies) {
+            if ("JSESSIONID".equals(cookie.getName())) {
+                return Optional.of(cookie.getValue());
+            }
+        }
+        return Optional.empty();
     }
 }
