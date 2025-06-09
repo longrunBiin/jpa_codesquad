@@ -29,8 +29,14 @@ public class PostService {
     }
 
     @Transactional
-    public void deletePostAndComment(Long postId) {
+    public void deletePostAndComment(Long postId, Long memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+
         Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
+        if (!memberId.equals(post.getMember().getMemberId())){
+            throw new IllegalArgumentException("작성자만 삭제할 수 있습니다");
+        }
         postRepository.delete(post);
     }
 

@@ -47,8 +47,22 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(@PathVariable Long postId) {
-        postService.deletePostAndComment(postId);
+    public ResponseEntity<String> deletePost(@PathVariable Long postId, HttpSession session, HttpServletRequest request) {
+        Optional<String> sessionId = extractTokenFromCookies(request.getCookies());
+        if (sessionId.isEmpty() || !sessionId.get().equals(session.getId())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인이 필요합니다");
+        }
+
+        Long loginMemberId = (Long) session.getAttribute("loginMemberId");
+        try {
+            postService.deletePostAndComment(postId, loginMemberId);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(e.getMessage());
+        }
+
+        return ResponseEntity.ok("글이 삭제되었습니다");
     }
 
     @PatchMapping("/{postId}")
